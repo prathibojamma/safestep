@@ -1,0 +1,54 @@
+/* =============================================
+   animations.css — All keyframe animations
+   ============================================= */
+
+/* ── SOS Ring Pulse ── */
+@keyframes sos-ring {
+  0%   { transform: scale(0.6); opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* ── SOS Button Pulse ── */
+@keyframes sos-pulse-btn {
+  0%, 100% { box-shadow: 0 0 40px var(--red-glow), inset 0 1px 0 rgba(255,255,255,.15); }
+  50%       { box-shadow: 0 0 80px rgba(232,39,26,.7), inset 0 1px 0 rgba(255,255,255,.15); }
+}
+
+/* ── Map Pulse ── */
+@keyframes map-pulse-anim {
+  0%   { transform: translate(-50%,-50%) scale(0.5); opacity: 0.8; }
+  100% { transform: translate(-50%,-50%) scale(1.8); opacity: 0; }
+}
+.map-pulse { animation: map-pulse-anim 2s infinite; }
+
+/* ── Status Dot ── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Banner Blink ── */
+@keyframes banner-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+/* ── Log Fade In ── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+.log-item { animation: fade-in 0.3s ease; }
+
+/* ── AI Typing Cursor ── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── Slide Up ── */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.slide-up { animation: slide-up 0.3s ease; }
