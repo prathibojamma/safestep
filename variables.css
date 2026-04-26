@@ -1,0 +1,50 @@
+/* =============================================
+   variables.css — Design tokens / CSS custom properties
+   SafeGuard Emergency Response System
+   ============================================= */
+
+:root {
+  /* Colors */
+  --red:        #E8271A;
+  --red-dark:   #B01E13;
+  --red-glow:   rgba(232, 39, 26, 0.35);
+  --orange:     #F5780A;
+  --amber:      #F5B50A;
+  --green:      #0EC95B;
+  --purple:     #7C5CFC;
+  --purple-lt:  #A587FF;
+
+  /* Backgrounds */
+  --bg:         #0A0A0B;
+  --bg2:        #111114;
+  --bg3:        #1A1A1E;
+  --bg4:        #222228;
+
+  /* Borders */
+  --border:     rgba(255, 255, 255, 0.08);
+  --border-md:  rgba(255, 255, 255, 0.12);
+
+  /* Text */
+  --text:       #F2F2F5;
+  --text2:      #8A8A9A;
+  --text3:      #5A5A6A;
+
+  /* Typography */
+  --font-h:     'Syne', sans-serif;
+  --font-b:     'DM Sans', sans-serif;
+  --font-mono:  'SF Mono', 'Fira Code', monospace;
+
+  /* Spacing */
+  --gap:        16px;
+  --gap-sm:     10px;
+  --gap-lg:     24px;
+
+  /* Radius */
+  --radius:     14px;
+  --radius-sm:  8px;
+  --radius-lg:  20px;
+
+  /* Transitions */
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.12s ease;
+}
