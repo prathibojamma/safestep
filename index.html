@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="SafeGuard — AI-Powered Emergency Response System"/>
+  <meta name="theme-color" content="#E8271A"/>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="SafeGuard — AI Emergency Response"/>
+  <meta property="og:description" content="Real-time SOS, AI threat detection, live GPS tracking"/>
+  <meta property="og:type" content="website"/>
+
+  <title>SafeGuard — AI Emergency Response</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+  <!-- CSS — order matters -->
+  <link rel="stylesheet" href="assets/css/variables.css"/>
+  <link rel="stylesheet" href="assets/css/reset.css"/>
+  <link rel="stylesheet" href="assets/css/layout.css"/>
+  <link rel="stylesheet" href="assets/css/components.css"/>
+  <link rel="stylesheet" href="assets/css/sos.css"/>
+  <link rel="stylesheet" href="assets/css/animations.css"/>
+</head>
+<body>
+
+  <!-- SOS Active Banner -->
+  <div id="sos-banner">
+    🚨 SOS ACTIVE — BROADCASTING LOCATION — EMERGENCY CONTACTS NOTIFIED
+  </div>
+
+  <div id="app">
+
+    <!-- ── SIDEBAR ── -->
+    <div id="sidebar">
+      <div class="sidebar-logo">🛡️</div>
+      <button class="nav-btn active" onclick="showView('home')" title="Home">🏠</button>
+      <button class="nav-btn" onclick="showView('tracking')" title="Live Tracking">📍</button>
+      <button class="nav-btn" onclick="showView('ai')" title="AI Analysis">🤖</button>
+      <button class="nav-btn" onclick="showView('contacts')" title="Contacts">👥</button>
+      <button class="nav-btn" onclick="showView('history')" title="History">📋</button>
+      <div class="sidebar-spacer"></div>
+      <button class="nav-btn" onclick="showView('settings')" title="Settings">⚙️</button>
+    </div>
+
+    <!-- ── MAIN ── -->
+    <div id="main">
+
+      <!-- Topbar -->
+      <div id="topbar">
+        <div class="logo">SAFE<span>GUARD</span></div>
+        <div class="status-pill">
+          <div class="status-dot"></div>
+          <span id="status-text">System online</span>
+        </div>
+        <div class="status-pill">
+          📍 <span id="loc-status">Locating…</span>
+        </div>
+        <div class="topbar-right">
+          <div class="time-display" id="clock">--:--:--</div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+
+        <!-- ══ HOME ══ -->
+        <div class="view active" id="view-home">
+          <div id="sos-section">
+            <div class="sos-ring">
+              <div class="sos-ring-anim"></div>
+              <div class="sos-ring-anim"></div>
+              <div class="sos-ring-anim"></div>
+              <svg id="countdown-ring" width="200" height="200">
+                <circle cx="100" cy="100" r="92" fill="none" stroke="rgba(232,39,26,0.3)" stroke-width="4"/>
+                <circle id="countdown-arc" cx="100" cy="100" r="92" fill="none"
+                  stroke="#E8271A" stroke-width="4"
+                  stroke-dasharray="578" stroke-dashoffset="578"
+                  stroke-linecap="round"/>
+              </svg>
+              <button id="sos-btn"
+                onmousedown="startSOSHold()"
+                ontouchstart="startSOSHold(event)"
+                onmouseup="cancelSOSHold()"
+                ontouchend="cancelSOSHold()">
+                <div class="sos-icon">🚨</div>
+                <div class="sos-label" id="sos-label">SOS</div>
+                <div class="sos-hint" id="sos-hint">HOLD TO TRIGGER</div>
+              </button>
+            </div>
+            <div class="sos-quick-actions" id="sos-actions">
+              <button class="btn btn-ghost btn-sm" onclick="triggerSOS('voice')">🎙️ Voice SOS</button>
+              <button class="btn btn-ghost btn-sm" onclick="startAudioMonitor();showView('ai')">🔊 Monitor</button>
+              <button class="btn btn-ghost btn-sm" onclick="showView('tracking')">📍 Track</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-label">AI Risk Score</div>
+              <div class="risk-header">
+                <div class="card-value" id="risk-score-val">--</div>
+                <div class="risk-badge risk-low" id="risk-badge">Calculating</div>
+              </div>
+              <div class="risk-bar-wrap">
+                <div class="risk-bar-fill" id="risk-bar" style="width:0%"></div>
+              </div>
+              <div class="card-sub" id="risk-detail">Initialising risk assessment…</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Live Location</div>
+              <div class="coord-row">
+                <div class="coord-box">
+                  <div class="coord-label">LAT</div>
+                  <div class="coord-val" id="coord-lat">--°</div>
+                </div>
+                <div class="coord-box">
+                  <div class="coord-label">LNG</div>
+                  <div class="coord-val" id="coord-lng">--°</div>
+                </div>
+              </div>
+              <div class="card-sub" id="coord-addr">Waiting for GPS…</div>
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="card card-sm">
+              <div class="card-label">Status</div>
+              <div class="stat-icon" id="system-status-icon">🟢</div>
+              <div class="stat-text green" id="system-status-txt">Safe</div>
+            </div>
+            <div class="card card-sm">
+              <div class="card-label">Contacts</div>
+              <div class="card-value card-value-sm" id="contact-count">0</div>
+              <div class="card-sub">Emergency</div>
+            </div>
+            <div class="card card-sm">
+              <div class="card-label">SOS Events</div>
+              <div class="card-value card-value-sm" id="sos-count">0</div>
+              <div class="card-sub">Total logged</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Live Activity</div>
+            <div id="event-log">
+              <div class="log-placeholder">Starting up…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ TRACKING ══ -->
+        <div class="view" id="view-tracking">
+        <div id="sos-active-bar" style="display:none">
+            <div class="sos-active-header">
+              <div class="sos-active-indicator"></div>
+              <div>
+                <div class="sos-active-title">SOS ACTIVE</div>
+                <div class="sos-active-sub">Broadcasting location to emergency contacts</div>
+              </div>
+              <div class="sos-active-timer" id="sos-timer">00:00</div>
+              <button class="btn btn-green btn-sm" onclick="resolveSOS()">✅ I'm Safe</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Live Map</div>
+            <div id="map-area">
+              <div class="map-grid"></div>
+              <div id="map-pin" class="map-pin">📍</div>
+              <div id="map-pulse-el" class="map-pulse" style="display:none"></div>
+              <div class="map-label" id="map-addr-label">Waiting for location…</div>
+              <div class="map-acc" id="map-acc-label">GPS ±∞m</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-label">Speed</div>
+              <div class="card-value" id="speed-val">0 <span class="unit">m/s</span></div>
+              <div class="card-sub" id="speed-status">Stationary</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Accuracy</div>
+              <div class="card-value" id="acc-val">-- <span class="unit">m</span></div>
+              <div class="card-sub">GPS precision</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-label">Location History</div>
+            <div id="location-history" class="location-history-list"></div>
+          </div>
+        </div>
+
+        <!-- ══ AI ══ -->
+        <div class="view" id="view-ai">
+          <div class="card">
+            <div class="section-title">🤖 AI Threat Detection</div>
+            <div class="tabs-wrap">
+              <div class="tabs">
+                <button class="tab active" onclick="switchAITab('monitor',this)">Audio Monitor</button>
+                <button class="tab" onclick="switchAITab('analyze',this)">Text Analysis</button>
+                <button class="tab" onclick="switchAITab('report',this)">Incident Report</button>
+              </div>
+            </div>
+
+            <!-- Monitor -->
+            <div id="ai-tab-monitor">
+              <div class="audio-row">
+                <div id="audio-viz"></div>
+                <button class="btn btn-purple btn-sm" id="mic-btn" onclick="toggleMicMonitor()">
+                  🎙️ Start Monitoring
+                </button>
+              </div>
+              <div class="ai-transcript-label">Live transcript:</div>
+              <div id="ai-output" class="ai-output">
+                Press "Start Monitoring" to begin audio threat detection…
+              </div>
+              <div id="keyword-chips" class="keyword-chips"></div>
+            </div>
+
+            <!-- Analyze -->
+            <div id="ai-tab-analyze" style="display:none">
+              <div class="ai-tab-desc">Type text to analyze for distress signals:</div>
+              <textarea id="analyze-input" class="analyze-textarea"
+                placeholder="e.g. someone is following me, I need help…"></textarea>
+              <button class="btn btn-purple btn-sm" onclick="analyzeText()">🔍 Analyze with AI</button>
+              <div id="analyze-output"></div>
+            </div>
+
+            <!-- Report -->
+            <div id="ai-tab-report" style="display:none">
+              <div class="ai-tab-desc">Generate AI incident summary for the last SOS event:</div>
+              <button class="btn btn-purple btn-sm" onclick="generateReport()">✨ Generate Report</button>
+              <div id="report-output"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Risk Factors</div>
+            <div id="risk-factors-list">
+              <div class="placeholder-text">Waiting for location…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ CONTACTS ══ -->
+        <div class="view" id="view-contacts">
+          <div class="card">
+            <div class="section-title">Emergency Contacts</div>
+            <div id="contacts-list"></div>
+            <button class="btn btn-ghost btn-sm full-width" onclick="showAddContact()">
+              + Add Contact
+            </button>
+          </div>
+          <div class="card" id="add-contact-form" style="display:none">
+            <div class="section-title">New Contact</div>
+            <div class="form-stack">
+              <input type="text" id="c-name" placeholder="Full name"/>
+              <input type="tel" id="c-phone" placeholder="Phone number"/>
+              <input type="email" id="c-email" placeholder="Email (optional)"/>
+              <div class="form-row">
+                <button class="btn btn-red btn-sm" onclick="saveContact()">Save</button>
+                <button class="btn btn-ghost btn-sm"
+                  onclick="document.getElementById('add-contact-form').style.display='none'">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ HISTORY ══ -->
+        <div class="view" id="view-history">
+          <div class="card">
+            <div class="section-title">Incident History</div>
+            <div id="history-list"></div>
+          </div>
+        </div>
+
+        <!-- ══ SETTINGS ══ -->
+        <div class="view" id="view-settings">
+          <div class="card">
+            <div class="section-title">Settings</div>
+            <div class="form-stack">
+              <div class="form-field">
+                <label class="field-label">Your Name</label>
+                <input type="text" id="user-name" value="User" placeholder="Your name"/>
+              </div>
+              <div class="form-field">
+                <label class="field-label">SOS Countdown (seconds)</label>
+                <div class="slider-row">
+                  <input type="range" id="countdown-sec" min="0" max="10" value="3"
+                    oninput="document.getElementById('countdown-val').textContent=this.value+'s'"/>
+                  <span id="countdown-val" class="slider-val">3s</span>
+                </div>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="field-label">Voice Activation</div>
+                  <div class="field-sub">Say "help" or "SOS" to trigger</div>
+                </div>
+                <input type="checkbox" id="voice-toggle" checked class="toggle"/>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="field-label">Risk Alerts</div>
+                  <div class="field-sub">Warn when risk score is high</div>
+                </div>
+                <input type="checkbox" id="risk-alert-toggle" checked class="toggle"/>
+              </div>
+              <button class="btn btn-red btn-sm" onclick="saveSettings()">Save Settings</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-label">Stack Info</div>
+            <div class="stack-info">
+              <div>AI: Claude claude-sonnet-4-20250514 (Anthropic)</div>
+              <div>Speech: Web Speech API (browser native)</div>
+              <div>GPS: Browser Geolocation API</div>
+              <div>Alerts: n8n + Vonage SMS + Firebase FCM</div>
+              <div>Cost: 100% Free Tier</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /content -->
+    </div><!-- /main -->
+  </div><!-- /app -->
+
+  <!-- JS — order matters -->
+  <script src="assets/js/state.js"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/keywords.js"></script>
+  <script src="assets/js/risk.js"></script>
+  <script src="assets/js/gps.js"></script>
+  <script src="assets/js/sos.js"></script>
+  <script src="assets/js/audio.js"></script>
+  <script src="assets/js/ai.js"></script>
+  <script src="assets/js/contacts.js"></script>
+  <script src="assets/js/history.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/app.js"></script>
+
+</body>
+</html>
