@@ -1,0 +1,135 @@
+/* =============================================
+   sos.css — SOS button, ring, active states
+   ============================================= */
+
+/* ── SOS Banner ── */
+#sos-banner {
+  display: none;
+  background: var(--red);
+  color: #fff;
+  padding: 10px 20px;
+  font-family: var(--font-h);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+  animation: banner-blink 1s infinite;
+  position: relative;
+  z-index: 100;
+}
+
+/* ── SOS Ring Container ── */
+.sos-ring {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Animated Rings ── */
+.sos-ring-anim {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 2px solid var(--red);
+  opacity: 0;
+  animation: sos-ring 3s ease-out infinite;
+}
+.sos-ring-anim:nth-child(2) { animation-delay: 1s; }
+.sos-ring-anim:nth-child(3) { animation-delay: 2s; }
+
+/* ── Countdown SVG Ring ── */
+#countdown-ring {
+  position: absolute;
+  top: 0; left: 0;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+#countdown-ring circle {
+  transition: stroke-dashoffset 0.1s linear;
+}
+
+/* ── SOS Button ── */
+#sos-btn {
+  width: 154px;
+  height: 154px;
+  border-radius: 50%;
+  border: none;
+  background: radial-gradient(circle at 35% 35%, #FF4033, var(--red-dark));
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 0 40px var(--red-glow), inset 0 1px 0 rgba(255,255,255,0.15);
+  transition: transform 0.15s, box-shadow 0.15s;
+  z-index: 1;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#sos-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 20px var(--red-glow);
+}
+#sos-btn.active-sos {
+  background: radial-gradient(circle at 35% 35%, #FF2010, #900);
+  animation: sos-pulse-btn 1s ease-in-out infinite;
+}
+
+/* ── SOS Button Text ── */
+.sos-icon  { font-size: 36px; }
+.sos-label {
+  font-family: var(--font-h);
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 3px;
+}
+.sos-hint {
+  font-size: 10px;
+  color: rgba(255,255,255,.55);
+  letter-spacing: 1px;
+}
+
+/* ── SOS Active Header (Tracking view) ── */
+#sos-active-bar { margin-bottom: 0; }
+.sos-active-header {
+  background: linear-gradient(135deg, rgba(232,39,26,.15), rgba(180,20,10,.08));
+  border: 1px solid rgba(232,39,26,.3);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sos-active-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 12px var(--red);
+  animation: pulse-dot 1s infinite;
+  flex-shrink: 0;
+}
+.sos-active-title {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--red);
+}
+.sos-active-sub {
+  font-size: 12px;
+  color: var(--text2);
+}
+.sos-active-timer {
+  margin-left: auto;
+  font-family: var(--font-h);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
