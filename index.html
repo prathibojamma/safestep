@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -190,7 +192,7 @@ window.collection = collection;
 
           <div class="card">
             <div class="section-title">Live Map</div>
-            <div id="map-area">
+            <div id="map" style="height: 320px; border-radius: 16px;"></div>
               <div class="map-grid"></div>
               <div id="map-pin" class="map-pin">📍</div>
               <div id="map-pulse-el" class="map-pulse" style="display:none"></div>
