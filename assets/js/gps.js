@@ -6,7 +6,6 @@
  */
 
 /** Start GPS tracking */
-import { updateMap } from './map.js';
 function initLocation() {
   if (!navigator.geolocation) {
     addLog('warn-log', '⚠️', 'Geolocation not supported', 'Using simulation');
