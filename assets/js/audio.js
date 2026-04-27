@@ -80,6 +80,7 @@ function _startSpeechRecognition() {
     document.getElementById('ai-output').textContent = text;
 
     const kw = detectKeywords(text);
+    state.lastKeywords = kw.found.map(k => k.kw);
     renderKeywordChips(kw.found);
 
     if (kw.shouldTrigger && !state.sosActive && (state.riskScore > 30 || kw.maxTier === 3)) {
