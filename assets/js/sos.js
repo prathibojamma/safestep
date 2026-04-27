@@ -47,7 +47,24 @@ function cancelSOSHold() {
 }
 
 // ── Trigger SOS ──────────────────────────────────────────────────────────────
+function generateReport(method, state) {
+  const time = new Date().toLocaleString();
 
+  const keywords = state.lastKeywords || [];
+
+  return `🚨 INCIDENT REPORT
+------------------------
+Time: ${time}
+Trigger: ${method}
+Risk Level: ${state.riskLevel}
+Coordinates: ${
+    state.coords
+      ? `${state.coords.lat.toFixed(4)}, ${state.coords.lng.toFixed(4)}`
+      : 'Unknown'
+  }
+Keywords: ${keywords.length ? keywords.join(', ') : 'None'}
+Status: ACTIVE`;
+}
 function triggerSOS(method = 'manual') {
   if (state.sosActive) return;
 
@@ -76,6 +93,16 @@ function triggerSOS(method = 'manual') {
 
   // Logs
   addLog('sos-log', '🚨', 'SOS Triggered', `Method: ${method}`);
+  // 🧠 AI INCIDENT REPORT
+const report = generateReport(method, state);
+
+console.log(report);
+
+// optional: store in state
+state.lastReport = report;
+
+// show in logs
+addLog('ai-log', '🧾', 'Incident Report Generated', 'Check console / history');
   addLog('sos-log', '📱', 'Contacts notified', 'SMS + Push via n8n dispatched');
   addLog('loc-log', '📍', 'Live GPS broadcasting', 'Real-time tracking active');
 
