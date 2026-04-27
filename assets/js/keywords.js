@@ -10,7 +10,8 @@
  *
  * SOS trigger threshold: confidence >= 0.40 OR any Tier 3 keyword
  */
-
+export function detectKeywords(text) { ... }
+export function renderKeywordChips(found) { ... }
 const TIER3_CRITICAL = [
   'help me', 'save me', 'call police', 'call 911', 'call 999', 'call 112',
   'let me go', 'dont touch me', 'rape', 'assault',
