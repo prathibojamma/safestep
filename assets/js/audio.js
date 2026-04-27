@@ -82,7 +82,7 @@ function _startSpeechRecognition() {
     const kw = detectKeywords(text);
     renderKeywordChips(kw.found);
 
-    if (kw.shouldTrigger && !state.sosActive) {
+    if (kw.shouldTrigger && !state.sosActive && (state.riskScore > 30 || kw.maxTier === 3)) {
       addLog('sos-log', '🚨', 'THREAT DETECTED via audio!',
         `Keywords: ${kw.found.map(k => k.kw).join(', ')}`);
       setTimeout(() => triggerSOS('keyword'), 500);
