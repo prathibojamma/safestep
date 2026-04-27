@@ -6,6 +6,7 @@
  */
 
 /** Start GPS tracking */
+import { updateMap } from './map.js';
 function initLocation() {
   if (!navigator.geolocation) {
     addLog('warn-log', '⚠️', 'Geolocation not supported', 'Using simulation');
@@ -76,6 +77,7 @@ function onLocation(pos) {
 
   // ── Map pin position ───────────────────────────────
   updateMapPin(lat, lng);
+  updateMap(lat, lng);
 
   // ── Location history ───────────────────────────────
   state.locationHistory.push({ lat, lng, t: new Date() });
