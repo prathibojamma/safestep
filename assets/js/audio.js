@@ -7,6 +7,10 @@
  */
 
 /** Toggle microphone monitoring on/off */
+import { detectKeywords, renderKeywordChips } from './keywords.js';
+import { triggerSOS } from './sos.js';
+import { state } from './state.js';
+
 function toggleMicMonitor() {
   if (state.micActive) {
     stopMicMonitor();
