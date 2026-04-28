@@ -155,40 +155,6 @@ function escHtml2(str) {
 }
 
 // ── Inline CSS ────────────────────────────────────────────────────────────────
-(function injectHistoryStyles() {
-  if (document.getElementById('history-styles')) return;
-  const style = document.createElement('style');
-  style.id = 'history-styles';
-  style.textContent = `
-    .history-toolbar {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 12px; padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-    .history-count { font-size: 13px; opacity: .6; }
-    .hist-item {
-      display: flex; gap: 12px; align-items: flex-start;
-      padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .hist-item:last-child { border-bottom: none; }
-    .hist-item.hist-resolved { opacity: .6; }
-    .hist-icon { font-size: 24px; flex-shrink: 0; padding-top: 2px; }
-    .hist-body { flex: 1; min-width: 0; }
-    .hist-header { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
-    .hist-type { font-weight: 700; font-size: 14px; }
-    .hist-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
-    .hist-badge.active   { background: rgba(232,39,26,.15); color: #E8271A; }
-    .hist-badge.resolved { background: rgba(34,197,94,.12); color: #22c55e; }
-    .hist-risk { font-size: 12px; font-weight: 600; margin-left: auto; }
-    .hist-addr { font-size: 13px; opacity: .8; margin-bottom: 4px; }
-    .hist-notes { font-size: 12px; opacity: .6; font-style: italic; margin-bottom: 4px; }
-    .hist-meta { display: flex; gap: 12px; font-size: 12px; opacity: .5; flex-wrap: wrap; }
-    .hist-map-link { color: #60a5fa; text-decoration: none; }
-    .hist-map-link:hover { text-decoration: underline; }
-    .placeholder-text { opacity: .5; font-size: 14px; padding: 12px 0; }
-  `;
-  document.head.appendChild(style);
-})();
 
 // ── Export ────────────────────────────────────────────────────────────────────
 window.saveIncident    = saveIncident;
