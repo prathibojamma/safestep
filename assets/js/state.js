@@ -1,38 +1,34 @@
-/**
- * state.js — Global application state
- * Single source of truth for all app data
- */
+// ── state.js ──────────────────────────────────────────────────────────────────
+// Central state — all modules read/write here
 
-const state = {
+window.state = {
+  // GPS
+  position:   null,   // { lat, lng, accuracy, speed, address }
+  lastLat:    null,
+  lastLng:    null,
+
   // SOS
   sosActive:      false,
   sosStartTime:   null,
-  sosTimerInterval: null,
+  sosTimerHandle: null,
   sosCount:       0,
 
-  // Location
-  coords:         null,           // { lat, lng, accuracy, speed, heading }
-  locationHistory: [],            // Array of { lat, lng, t }
-
   // Risk
-  riskScore:      0,
-  riskLevel:      'low',         // low | medium | high | critical
+  riskScore:  0,
+  riskLevel:  'low',   // low | medium | high | critical
 
-  // Contacts
-  contacts:       [],            // Array of { name, phone, email }
+  // Audio / AI
+  micActive:       false,
+  recognition:     null,
+  audioContext:    null,
+  analyserNode:    null,
+  micStream:       null,
 
-  // History
-  history:        [],            // Array of SOS events
-
-  // UI
-  holdInterval:   null,
-  countdownSec:   3,
-
-  // Audio
-  micActive:      false,
-  recognition:    null,
-  vizInterval:    null,
-
-  // User
-  userName:       'User',
+  // Settings
+  settings: {
+    name:        'User',
+    countdown:   3,
+    voice:       true,
+    riskAlert:   true,
+  },
 };
