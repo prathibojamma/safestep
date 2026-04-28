@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Leaflet CSS (map) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Firebase -->
   <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyCy0TpXMY8efg_2QsSwtrxsgo1bEEhne6c",
+      authDomain: "safestep-bb825.firebaseapp.com",
+      projectId: "safestep-bb825",
+      storageBucket: "safestep-bb825.appspot.com",
+      messagingSenderId: "22524245527",
+      appId: "1:22524245527:web:eb473e7acf96a57d078e52"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+    window.db         = db;
+    window.addDoc     = addDoc;
+    window.collection = collection;
+  </script>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCy0TpXMY8efg_2QsSwtrxsgo1bEEhne6c",
-  authDomain: "safestep-bb825.firebaseapp.com",
-  projectId: "safestep-bb825",
-  storageBucket: "safestep-bb825.appspot.com",
-  messagingSenderId: "22524245527",
-  appId: "1:22524245527:web:eb473e7acf96a57d078e52"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// make globally usable
-window.db = db;
-window.addDoc = addDoc;
-window.collection = collection;
-</script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="description" content="SafeGuard — AI-Powered Emergency Response System"/>
   <meta name="theme-color" content="#E8271A"/>
-
-  <!-- Open Graph -->
   <meta property="og:title" content="SafeGuard — AI Emergency Response"/>
   <meta property="og:description" content="Real-time SOS, AI threat detection, live GPS tracking"/>
   <meta property="og:type" content="website"/>
-
   <title>SafeGuard — AI Emergency Response</title>
 
   <!-- Google Fonts -->
@@ -41,7 +38,7 @@ window.collection = collection;
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 
-  <!-- CSS — order matters -->
+  <!-- CSS — order matters (unchanged from original) -->
   <link rel="stylesheet" href="assets/css/variables.css"/>
   <link rel="stylesheet" href="assets/css/reset.css"/>
   <link rel="stylesheet" href="assets/css/layout.css"/>
@@ -49,6 +46,7 @@ window.collection = collection;
   <link rel="stylesheet" href="assets/css/sos.css"/>
   <link rel="stylesheet" href="assets/css/animations.css"/>
 </head>
+
 <body>
 
   <!-- SOS Active Banner -->
@@ -61,13 +59,13 @@ window.collection = collection;
     <!-- ── SIDEBAR ── -->
     <div id="sidebar">
       <div class="sidebar-logo">🛡️</div>
-      <button class="nav-btn active" onclick="showView('home')" title="Home">🏠</button>
-      <button class="nav-btn" onclick="showView('tracking')" title="Live Tracking">📍</button>
-      <button class="nav-btn" onclick="showView('ai')" title="AI Analysis">🤖</button>
-      <button class="nav-btn" onclick="showView('contacts')" title="Contacts">👥</button>
-      <button class="nav-btn" onclick="showView('history')" title="History">📋</button>
+      <button class="nav-btn active" onclick="showView('home')"     title="Home">🏠</button>
+      <button class="nav-btn"        onclick="showView('tracking')" title="Live Tracking">📍</button>
+      <button class="nav-btn"        onclick="showView('ai')"       title="AI Analysis">🤖</button>
+      <button class="nav-btn"        onclick="showView('contacts')" title="Contacts">👥</button>
+      <button class="nav-btn"        onclick="showView('history')"  title="History">📋</button>
       <div class="sidebar-spacer"></div>
-      <button class="nav-btn" onclick="showView('settings')" title="Settings">⚙️</button>
+      <button class="nav-btn"        onclick="showView('settings')" title="Settings">⚙️</button>
     </div>
 
     <!-- ── MAIN ── -->
@@ -93,6 +91,7 @@ window.collection = collection;
 
         <!-- ══ HOME ══ -->
         <div class="view active" id="view-home">
+
           <div id="sos-section">
             <div class="sos-ring">
               <div class="sos-ring-anim"></div>
@@ -101,9 +100,9 @@ window.collection = collection;
               <svg id="countdown-ring" width="200" height="200">
                 <circle cx="100" cy="100" r="92" fill="none" stroke="rgba(232,39,26,0.3)" stroke-width="4"/>
                 <circle id="countdown-arc" cx="100" cy="100" r="92" fill="none"
-                  stroke="#E8271A" stroke-width="4"
-                  stroke-dasharray="578" stroke-dashoffset="578"
-                  stroke-linecap="round"/>
+                        stroke="#E8271A" stroke-width="4"
+                        stroke-dasharray="578" stroke-dashoffset="578"
+                        stroke-linecap="round" style="transition:stroke-dashoffset .05s linear"/>
               </svg>
               <button id="sos-btn"
                 onmousedown="startSOSHold()"
@@ -112,9 +111,10 @@ window.collection = collection;
                 ontouchend="cancelSOSHold()">
                 <div class="sos-icon">🚨</div>
                 <div class="sos-label" id="sos-label">SOS</div>
-                <div class="sos-hint" id="sos-hint">HOLD TO TRIGGER</div>
+                <div class="sos-hint"  id="sos-hint">HOLD TO TRIGGER</div>
               </button>
             </div>
+
             <div class="sos-quick-actions" id="sos-actions">
               <button class="btn btn-ghost btn-sm" onclick="triggerSOS('voice')">🎙️ Voice SOS</button>
               <button class="btn btn-ghost btn-sm" onclick="startAudioMonitor();showView('ai')">🔊 Monitor</button>
@@ -174,11 +174,13 @@ window.collection = collection;
               <div class="log-placeholder">Starting up…</div>
             </div>
           </div>
-        </div>
+
+        </div><!-- /view-home -->
 
         <!-- ══ TRACKING ══ -->
         <div class="view" id="view-tracking">
-        <div id="sos-active-bar" style="display:none">
+
+          <div id="sos-active-bar" style="display:none">
             <div class="sos-active-header">
               <div class="sos-active-indicator"></div>
               <div>
@@ -192,12 +194,11 @@ window.collection = collection;
 
           <div class="card">
             <div class="section-title">Live Map</div>
-            <div id="map" style="height: 320px; border-radius: 16px;"></div>
-             
-              
-              <div id="map-pulse-el" class="map-pulse" style="display:none"></div>
-              <div class="map-label" id="map-addr-label">Waiting for location…</div>
-              <div class="map-acc" id="map-acc-label">GPS ±∞m</div>
+            <div id="map" style="height:320px;border-radius:16px;overflow:hidden;"></div>
+            <div class="map-label" id="map-addr-label">Waiting for location…</div>
+            <div class="map-acc"   id="map-acc-label">GPS ±∞m</div>
+            <div style="margin-top:10px">
+              <button class="btn btn-ghost btn-sm" onclick="centreMapOnUser()">🎯 Centre on me</button>
             </div>
           </div>
 
@@ -205,7 +206,7 @@ window.collection = collection;
             <div class="card">
               <div class="card-label">Speed</div>
               <div class="card-value" id="speed-val">0 <span class="unit">m/s</span></div>
-              <div class="card-sub" id="speed-status">Stationary</div>
+              <div class="card-sub"   id="speed-status">Stationary</div>
             </div>
             <div class="card">
               <div class="card-label">Accuracy</div>
@@ -218,17 +219,19 @@ window.collection = collection;
             <div class="card-label">Location History</div>
             <div id="location-history" class="location-history-list"></div>
           </div>
-        </div>
+
+        </div><!-- /view-tracking -->
 
         <!-- ══ AI ══ -->
         <div class="view" id="view-ai">
+
           <div class="card">
             <div class="section-title">🤖 AI Threat Detection</div>
             <div class="tabs-wrap">
               <div class="tabs">
                 <button class="tab active" onclick="switchAITab('monitor',this)">Audio Monitor</button>
-                <button class="tab" onclick="switchAITab('analyze',this)">Text Analysis</button>
-                <button class="tab" onclick="switchAITab('report',this)">Incident Report</button>
+                <button class="tab"        onclick="switchAITab('analyze',this)">Text Analysis</button>
+                <button class="tab"        onclick="switchAITab('report',this)">Incident Report</button>
               </div>
             </div>
 
@@ -241,9 +244,7 @@ window.collection = collection;
                 </button>
               </div>
               <div class="ai-transcript-label">Live transcript:</div>
-              <div id="ai-output" class="ai-output">
-                Press "Start Monitoring" to begin audio threat detection…
-              </div>
+              <div id="ai-output" class="ai-output">Press "Start Monitoring" to begin audio threat detection…</div>
               <div id="keyword-chips" class="keyword-chips"></div>
             </div>
 
@@ -270,22 +271,25 @@ window.collection = collection;
               <div class="placeholder-text">Waiting for location…</div>
             </div>
           </div>
-        </div>
+
+        </div><!-- /view-ai -->
 
         <!-- ══ CONTACTS ══ -->
         <div class="view" id="view-contacts">
+
           <div class="card">
             <div class="section-title">Emergency Contacts</div>
             <div id="contacts-list"></div>
-            <button class="btn btn-ghost btn-sm full-width" onclick="showAddContact()">
+            <button class="btn btn-ghost btn-sm full-width" onclick="showAddContact()" style="margin-top:12px">
               + Add Contact
             </button>
           </div>
+
           <div class="card" id="add-contact-form" style="display:none">
             <div class="section-title">New Contact</div>
             <div class="form-stack">
-              <input type="text" id="c-name" placeholder="Full name"/>
-              <input type="tel" id="c-phone" placeholder="Phone number"/>
+              <input type="text"  id="c-name"  placeholder="Full name"/>
+              <input type="tel"   id="c-phone" placeholder="Phone number (e.g. +91 98765 43210)"/>
               <input type="email" id="c-email" placeholder="Email (optional)"/>
               <div class="form-row">
                 <button class="btn btn-red btn-sm" onclick="saveContact()">Save</button>
@@ -296,7 +300,8 @@ window.collection = collection;
               </div>
             </div>
           </div>
-        </div>
+
+        </div><!-- /view-contacts -->
 
         <!-- ══ HISTORY ══ -->
         <div class="view" id="view-history">
@@ -308,6 +313,7 @@ window.collection = collection;
 
         <!-- ══ SETTINGS ══ -->
         <div class="view" id="view-settings">
+
           <div class="card">
             <div class="section-title">Settings</div>
             <div class="form-stack">
@@ -340,37 +346,39 @@ window.collection = collection;
               <button class="btn btn-red btn-sm" onclick="saveSettings()">Save Settings</button>
             </div>
           </div>
+
           <div class="card">
             <div class="card-label">Stack Info</div>
             <div class="stack-info">
               <div>AI: Claude claude-sonnet-4-20250514 (Anthropic)</div>
               <div>Speech: Web Speech API (browser native)</div>
-              <div>GPS: Browser Geolocation API</div>
-              <div>Alerts: n8n + Vonage SMS + Firebase FCM</div>
-              <div>Cost: 100% Free Tier</div>
+              <div>GPS: Browser Geolocation API + Nominatim</div>
+              <div>Map: Leaflet + OpenStreetMap (free)</div>
+              <div>Storage: localStorage + Firebase Firestore</div>
+              <div>Alerts: SMS via native sms: links</div>
             </div>
           </div>
-        </div>
+
+        </div><!-- /view-settings -->
 
       </div><!-- /content -->
     </div><!-- /main -->
   </div><!-- /app -->
 
-  <!-- JS — order matters -->
-  <!-- JS — order matters -->
-<script src="assets/js/state.js"></script>
-<script src="assets/js/utils.js"></script>
-<script src="assets/js/keywords.js"></script>
-<script src="assets/js/risk.js"></script>
-<script src="assets/js/sos.js"></script>
-<script src="assets/js/audio.js"></script>
-<script src="assets/js/ai.js"></script>
-<script src="assets/js/contacts.js"></script>  
-<script src="assets/js/history.js"></script>   <!-- ← replace with new file -->
-<script src="assets/js/ui.js"></script>
-<script src="assets/js/map.js"></script>        <!-- ← replace with new file -->
-<script src="assets/js/gps.js"></script>        <!-- ← replace with new file -->
-<script src="assets/js/app.js"></script>        <!-- ← replace with new file -->
+  <!-- JS — ORDER MATTERS -->
+  <script src="assets/js/state.js"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/keywords.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/risk.js"></script>
+  <script src="assets/js/sos.js"></script>
+  <script src="assets/js/audio.js"></script>
+  <script src="assets/js/ai.js"></script>
+  <script src="assets/js/contacts.js"></script>
+  <script src="assets/js/history.js"></script>
+  <script src="assets/js/map.js"></script>
+  <script src="assets/js/gps.js"></script>
+  <script src="assets/js/app.js"></script>
 
 </body>
 </html>
