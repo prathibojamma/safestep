@@ -172,42 +172,6 @@ Format as a clear 3-section report: Incident Summary, Location Details, Recommen
 }
 
 // ── Inject styles ─────────────────────────────────────────────────────────────
-(function injectAIStyles() {
-  if (document.getElementById('ai-styles')) return;
-  const s = document.createElement('style');
-  s.id = 'ai-styles';
-  s.textContent = `
-    .ai-loading { opacity:.6; font-size:14px; padding:12px 0; }
-    .ai-tab-desc { font-size:13px; opacity:.6; margin-bottom:10px; }
-    .analyze-textarea {
-      width:100%; min-height:90px; resize:vertical;
-      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
-      border-radius:10px; padding:12px; color:inherit; font-size:14px;
-      outline:none; margin-bottom:10px; box-sizing:border-box;
-    }
-    .analyze-result { margin-top:14px; }
-    .ar-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-    .ar-icon   { font-size:24px; }
-    .ar-level  { font-size:18px; font-weight:800; }
-    .ar-score  { font-size:14px; font-weight:600; opacity:.8; }
-    .ar-section { margin-bottom:10px; }
-    .ar-label   { font-size:11px; opacity:.5; text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px; }
-    .ar-action  { font-size:14px; font-weight:600; }
-    .ar-chips   { display:flex; flex-wrap:wrap; gap:6px; }
-    .ar-reasoning { font-size:12px; opacity:.5; margin-top:6px; }
-    .report-text { font-size:14px; line-height:1.7; }
-    .tabs-wrap { margin-bottom:16px; }
-    .tabs { display:flex; gap:4px; background:rgba(255,255,255,.05); border-radius:10px; padding:4px; }
-    .tab {
-      flex:1; padding:8px; border:none; background:transparent;
-      color:inherit; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;
-      transition:.15s;
-    }
-    .tab.active { background:rgba(232,39,26,.2); color:#E8271A; }
-    .tab:hover:not(.active) { background:rgba(255,255,255,.08); }
-  `;
-  document.head.appendChild(s);
-})();
 
 window.switchAITab    = switchAITab;
 window.analyzeText    = analyzeText;
