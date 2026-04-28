@@ -202,29 +202,6 @@ function updateMicBtn(active) {
 }
 
 // ── Inject styles ─────────────────────────────────────────────────────────────
-(function injectAudioStyles() {
-  if (document.getElementById('audio-styles')) return;
-  const s = document.createElement('style');
-  s.id = 'audio-styles';
-  s.textContent = `
-    .audio-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
-    #audio-viz { flex:1; min-height:40px; }
-    .ai-output {
-      background:rgba(0,0,0,.2); border-radius:10px; padding:12px;
-      max-height:180px; overflow-y:auto; font-size:13px;
-      font-family:monospace; line-height:1.6;
-    }
-    .ai-line { margin-bottom:4px; }
-    .ai-ts   { opacity:.4; margin-right:6px; }
-    .ai-transcript-label { font-size:12px; opacity:.5; margin:10px 0 4px; }
-    .keyword-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-    .kw-chip {
-      font-size:12px; padding:3px 10px; border-radius:20px;
-      border:1px solid; font-weight:600; background:transparent;
-    }
-  `;
-  document.head.appendChild(s);
-})();
 
 window.toggleMicMonitor  = toggleMicMonitor;
 window.startAudioMonitor = startAudioMonitor;
