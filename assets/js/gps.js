@@ -163,42 +163,6 @@ function updateLocStatus(msg) {
 function getCurrentPosition() { return _lastPosition; }
 
 // ── Inline styles ─────────────────────────────────────────────────────────────
-(function injectGPSStyles() {
-  if (document.getElementById('gps-styles')) return;
-  const style = document.createElement('style');
-  style.id = 'gps-styles';
-  style.textContent = `
-    .map-user-dot {
-      width: 18px; height: 18px;
-      background: #E8271A; border-radius: 50%;
-      border: 3px solid #fff;
-      position: relative;
-      box-shadow: 0 0 0 2px rgba(232,39,26,.4);
-    }
-    .map-user-pulse {
-      position: absolute; inset: -6px;
-      border-radius: 50%;
-      border: 2px solid rgba(232,39,26,.5);
-      animation: mapPulse 2s ease-out infinite;
-    }
-    .map-sos-pin { font-size: 28px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
-    @keyframes mapPulse {
-      0%   { transform: scale(1); opacity: .8; }
-      100% { transform: scale(2.5); opacity: 0; }
-    }
-    .loc-hist-row {
-      display: flex; gap: 10px; align-items: center;
-      padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-      font-size: 12px;
-    }
-    .loc-hist-row:last-child { border-bottom: none; }
-    .loc-hist-time { opacity: .5; white-space: nowrap; }
-    .loc-hist-addr { flex: 1; opacity: .85; }
-    .loc-hist-acc  { opacity: .4; white-space: nowrap; }
-    .location-history-list { max-height: 240px; overflow-y: auto; }
-  `;
-  document.head.appendChild(style);
-})();
 
 // ── Export ────────────────────────────────────────────────────────────────────
 window.startGPS          = startGPS;
