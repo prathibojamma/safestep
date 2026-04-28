@@ -1,138 +1,231 @@
-/**
- * audio.js — Audio Monitoring & Speech Recognition
- *
- * Uses Web Speech API for real-time transcription.
- * Pipes transcript to keyword detector every result event.
- * Auto-triggers SOS if distress keywords detected.
- */
+// ── audio.js ──────────────────────────────────────────────────────────────────
+// Audio monitoring: Web Speech API transcript, keyword scoring, visualiser
 
-/** Toggle microphone monitoring on/off */
-import { detectKeywords, renderKeywordChips } from './keywords.js';
-import { triggerSOS } from './sos.js';
-import { state } from './state.js';
+let _recognition   = null;
+let _micActive     = false;
+let _audioCtx      = null;
+let _analyser      = null;
+let _vizFrame      = null;
+let _micStream     = null;
 
+// ── Toggle mic ────────────────────────────────────────────────────────────────
 function toggleMicMonitor() {
-  if (state.micActive) {
-    stopMicMonitor();
-  } else {
-    startAudioMonitor();
+  _micActive ? stopAudioMonitor() : startAudioMonitor();
+}
+
+function startAudioMonitor() {
+  if (_micActive) return;
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showToast('Speech recognition not supported in this browser', 'warning');
+    appendAIOutput('⚠️ Speech recognition not supported. Try Chrome or Edge.');
+    return;
+  }
+
+  _recognition = new SpeechRecognition();
+  _recognition.continuous   = true;
+  _recognition.interimResults = true;
+  _recognition.lang         = 'en-US';
+
+  _recognition.onstart = () => {
+    _micActive = true;
+    updateMicBtn(true);
+    logEvent('🎙️ Audio monitor started');
+    appendAIOutput('🎙️ Listening… speak naturally.');
+    startVisualiser();
+  };
+
+  _recognition.onresult = (e) => {
+    let interim = '';
+    let final_  = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      e.results[i].isFinal ? (final_ += t) : (interim += t);
+    }
+
+    if (final_) {
+      processTranscript(final_.trim());
+    }
+
+    const outEl = document.getElementById('ai-output');
+    if (outEl && interim) outEl.textContent = `[…] ${interim}`;
+  };
+
+  _recognition.onerror = (e) => {
+    if (e.error === 'not-allowed') {
+      showToast('Microphone access denied', 'error');
+      appendAIOutput('❌ Mic access denied — please allow microphone in browser settings.');
+    } else if (e.error !== 'no-speech') {
+      appendAIOutput(`⚠️ Speech error: ${e.error}`);
+    }
+  };
+
+  _recognition.onend = () => {
+    // Auto-restart unless manually stopped
+    if (_micActive) {
+      setTimeout(() => _recognition && _recognition.start(), 500);
+    }
+  };
+
+  _recognition.start();
+  startRawMicStream(); // for visualiser
+}
+
+function stopAudioMonitor() {
+  _micActive = false;
+  if (_recognition) { _recognition.stop(); _recognition = null; }
+  stopVisualiser();
+  stopRawMicStream();
+  updateMicBtn(false);
+  logEvent('🎙️ Audio monitor stopped');
+}
+
+// ── Process transcript ────────────────────────────────────────────────────────
+function processTranscript(text) {
+  if (!text) return;
+  const result = window.scoreText(text);
+
+  appendAIOutput(`📝 "${text}" → Risk: ${result.score}% (${result.level})`);
+
+  // Update state for risk module
+  if (window.state) state._lastKeywordScore = result.score;
+
+  // Highlight matched keywords
+  renderKeywordChips(result.matches);
+
+  // Check voice activation setting
+  const voiceOn = document.getElementById('voice-toggle')?.checked;
+
+  if (result.level === 'critical') {
+    logEvent(`🚨 Critical keyword detected: "${text}"`);
+    showToast('🚨 Distress detected!', 'error', 6000);
+    vibrate([400, 100, 400]);
+    if (voiceOn) triggerSOS('voice');
+  } else if (result.level === 'high') {
+    logEvent(`⚠️ High-risk phrase: "${text}"`);
+    showToast('⚠️ Distress phrase detected', 'warning', 4000);
+  }
+
+  calculateRisk && calculateRisk();
+}
+
+// ── Keyword chips ─────────────────────────────────────────────────────────────
+function renderKeywordChips(matches) {
+  const el = document.getElementById('keyword-chips');
+  if (!el || !matches.length) return;
+
+  const colors = { critical:'#E8271A', high:'#f97316', medium:'#f59e0b', low:'#60a5fa' };
+  el.innerHTML = matches.map(m => `
+    <span class="kw-chip" style="border-color:${colors[m.level]};color:${colors[m.level]}">
+      ${m.word}
+    </span>
+  `).join('');
+}
+
+// ── AI output log ─────────────────────────────────────────────────────────────
+function appendAIOutput(text) {
+  const el = document.getElementById('ai-output');
+  if (!el) return;
+  const line = document.createElement('div');
+  line.className = 'ai-line';
+  line.innerHTML = `<span class="ai-ts">${new Date().toLocaleTimeString()}</span> ${escHtml(text)}`;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+// ── Mic visualiser (canvas bars) ─────────────────────────────────────────────
+function startRawMicStream() {
+  navigator.mediaDevices?.getUserMedia({ audio: true }).then(stream => {
+    _micStream = stream;
+    _audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
+    _analyser  = _audioCtx.createAnalyser();
+    _analyser.fftSize = 64;
+    const src = _audioCtx.createMediaStreamSource(stream);
+    src.connect(_analyser);
+    drawVisualiser();
+  }).catch(() => {}); // silently fail if denied
+}
+
+function stopRawMicStream() {
+  cancelAnimationFrame(_vizFrame);
+  _vizFrame = null;
+  if (_micStream) { _micStream.getTracks().forEach(t => t.stop()); _micStream = null; }
+  if (_audioCtx)  { _audioCtx.close(); _audioCtx = null; }
+  const el = document.getElementById('audio-viz');
+  if (el) el.innerHTML = '';
+}
+
+function startVisualiser() {
+  // Ensure container has canvas
+  const container = document.getElementById('audio-viz');
+  if (!container) return;
+  if (!container.querySelector('canvas')) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 120; canvas.height = 40;
+    canvas.style.cssText = 'display:block;border-radius:6px;background:rgba(255,255,255,.04)';
+    container.appendChild(canvas);
   }
 }
 
-/** Start audio monitoring */
-async function startAudioMonitor() {
-  if (state.micActive) return;
+function drawVisualiser() {
+  if (!_analyser) return;
+  const container = document.getElementById('audio-viz');
+  const canvas    = container?.querySelector('canvas');
+  if (!canvas) return;
 
-  try {
-    // Request mic permission
-    await navigator.mediaDevices.getUserMedia({ audio: true });
+  const ctx  = canvas.getContext('2d');
+  const data = new Uint8Array(_analyser.frequencyBinCount);
 
-    state.micActive = true;
-    _setMicButtonActive(true);
-    addLog('ai-log', '🎙️', 'Audio monitoring active', 'Listening for distress keywords');
+  function frame() {
+    _vizFrame = requestAnimationFrame(frame);
+    _analyser.getByteFrequencyData(data);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Build visualizer bars
-    _buildVizBars();
-    state.vizInterval = setInterval(_animateVizBars, 100);
-
-    // Start speech recognition
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      _startSpeechRecognition();
-    } else {
-      document.getElementById('ai-output').textContent =
-        'Speech API not available in this browser. Use Text Analysis tab instead.';
-    }
-
-  } catch (err) {
-    addLog('warn-log', '⚠️', 'Microphone denied', 'Use Text Analysis tab to test AI');
-    document.getElementById('ai-output').textContent =
-      'Microphone access denied. Use the Text Analysis tab to test AI threat detection.';
+    const barW = canvas.width / data.length;
+    data.forEach((v, i) => {
+      const h = (v / 255) * canvas.height;
+      const hue = 0; // red
+      ctx.fillStyle = `hsl(${hue},80%,${40 + (v/255)*30}%)`;
+      ctx.fillRect(i * barW, canvas.height - h, barW - 1, h);
+    });
   }
+  frame();
 }
 
-/** Stop audio monitoring */
-function stopMicMonitor() {
-  state.micActive = false;
-  clearInterval(state.vizInterval);
-  state.recognition?.stop();
-  state.recognition = null;
-
-  _setMicButtonActive(false);
-  document.getElementById('audio-viz').innerHTML = '';
-  document.getElementById('ai-output').textContent = 'Monitoring stopped.';
-  addLog('ai-log', '⏹', 'Audio monitoring stopped', '');
-}
-
-// ── Private helpers ───────────────────────────────────────────────────────────
-
-function _startSpeechRecognition() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  state.recognition = new SR();
-  state.recognition.continuous     = true;
-  state.recognition.interimResults = true;
-  state.recognition.lang           = 'en-US';
-
-  state.recognition.onresult = (event) => {
-    const text = Array.from(event.results)
-      .map(r => r[0].transcript)
-      .join(' ');
-
-    document.getElementById('ai-output').textContent = text;
-
-    const kw = detectKeywords(text);
-    state.lastKeywords = kw.found.map(k => k.kw);
-    renderKeywordChips(kw.found);
-
-    if (kw.shouldTrigger && !state.sosActive && (state.riskScore > 30 || kw.maxTier === 3)) {
-      addLog('sos-log', '🚨', 'THREAT DETECTED via audio!',
-        `Keywords: ${kw.found.map(k => k.kw).join(', ')}`);
-      setTimeout(() => triggerSOS('keyword'), 500);
-    }
-  };
-
-  state.recognition.onend = () => {
-    // Auto-restart if still active
-    if (state.micActive) {
-      try { state.recognition.start(); } catch (_) {}
-    }
-  };
-
-  state.recognition.onerror = (e) => {
-    if (e.error !== 'aborted') {
-      addLog('warn-log', '⚠️', `Speech error: ${e.error}`, '');
-    }
-  };
-
-  state.recognition.start();
-  document.getElementById('ai-output').textContent =
-    'Listening… say "help" or "I need help" to test auto-SOS detection.';
-}
-
-function _setMicButtonActive(active) {
+// ── Mic button state ──────────────────────────────────────────────────────────
+function updateMicBtn(active) {
   const btn = document.getElementById('mic-btn');
-  if (active) {
-    btn.textContent        = '⏹ Stop Monitoring';
-    btn.style.background   = 'rgba(232,39,26,.15)';
-    btn.style.color        = 'var(--red)';
-    btn.style.borderColor  = 'rgba(232,39,26,.3)';
-  } else {
-    btn.textContent        = '🎙️ Start Monitoring';
-    btn.style.background   = '';
-    btn.style.color        = '';
-    btn.style.borderColor  = '';
-  }
+  if (!btn) return;
+  btn.textContent = active ? '⏹️ Stop Monitoring' : '🎙️ Start Monitoring';
+  btn.style.background = active ? '#E8271A' : '';
 }
 
-function _buildVizBars() {
-  const viz = document.getElementById('audio-viz');
-  viz.innerHTML = Array.from({ length: 20 }, (_, i) =>
-    `<div class="viz-bar" id="vbar${i}" style="height:${Math.random() * 30 + 5}px"></div>`
-  ).join('');
-}
+// ── Inject styles ─────────────────────────────────────────────────────────────
+(function injectAudioStyles() {
+  if (document.getElementById('audio-styles')) return;
+  const s = document.createElement('style');
+  s.id = 'audio-styles';
+  s.textContent = `
+    .audio-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+    #audio-viz { flex:1; min-height:40px; }
+    .ai-output {
+      background:rgba(0,0,0,.2); border-radius:10px; padding:12px;
+      max-height:180px; overflow-y:auto; font-size:13px;
+      font-family:monospace; line-height:1.6;
+    }
+    .ai-line { margin-bottom:4px; }
+    .ai-ts   { opacity:.4; margin-right:6px; }
+    .ai-transcript-label { font-size:12px; opacity:.5; margin:10px 0 4px; }
+    .keyword-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .kw-chip {
+      font-size:12px; padding:3px 10px; border-radius:20px;
+      border:1px solid; font-weight:600; background:transparent;
+    }
+  `;
+  document.head.appendChild(s);
+})();
 
-function _animateVizBars() {
-  for (let i = 0; i < 20; i++) {
-    const b = document.getElementById('vbar' + i);
-    if (b) b.style.height = (Math.random() * 32 + 4) + 'px';
-  }
-}
+window.toggleMicMonitor  = toggleMicMonitor;
+window.startAudioMonitor = startAudioMonitor;
+window.stopAudioMonitor  = stopAudioMonitor;
