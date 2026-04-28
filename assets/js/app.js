@@ -80,49 +80,6 @@ function loadSettings() {
 }
 
 // ── Inject activity-log styles ────────────────────────────────────────────────
-(function injectAppStyles() {
-  if (document.getElementById('app-base-styles')) return;
-  const style = document.createElement('style');
-  style.id = 'app-base-styles';
-  style.textContent = `
-    .log-item {
-      display: flex; gap: 10px; font-size: 13px;
-      padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
-      animation: fadeSlide .3s ease;
-    }
-    .log-item:last-child { border-bottom: none; }
-    .log-time { opacity: .45; white-space: nowrap; }
-    .log-msg  { flex: 1; }
-    @keyframes fadeSlide {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    #map { background: #1a1a2e; }
-    .map-label { font-size: 13px; opacity: .7; margin-top: 8px; }
-    .map-acc   { font-size: 12px; opacity: .45; margin-top: 2px; }
-    .section-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
-    .placeholder-text { opacity: .5; font-size: 14px; padding: 8px 0; }
-    .full-width { width: 100%; }
-    .form-stack { display: flex; flex-direction: column; gap: 10px; }
-    .form-stack input, .form-stack textarea {
-      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
-      border-radius: 8px; padding: 10px 14px; color: inherit; font-size: 14px;
-      outline: none; transition: border .2s;
-    }
-    .form-stack input:focus, .form-stack textarea:focus {
-      border-color: rgba(232,39,26,.5);
-    }
-    .form-row { display: flex; gap: 10px; }
-    .btn { cursor: pointer; border: none; border-radius: 8px; font-weight: 600; transition: .15s; }
-    .btn-red   { background: #E8271A; color: #fff; padding: 10px 20px; }
-    .btn-ghost { background: rgba(255,255,255,.08); color: inherit; padding: 8px 16px; }
-    .btn-green { background: #16a34a; color: #fff; padding: 8px 16px; }
-    .btn-purple{ background: #7c3aed; color: #fff; padding: 8px 16px; }
-    .btn-sm    { padding: 8px 14px; font-size: 13px; }
-    .btn:hover { filter: brightness(1.15); }
-  `;
-  document.head.appendChild(style);
-})();
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
