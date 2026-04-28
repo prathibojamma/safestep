@@ -135,38 +135,6 @@ function showContactError(msg) {
 }
 
 // ── Inline CSS for contact cards (injected once) ──────────────────────────────
-(function injectContactStyles() {
-  if (document.getElementById('contact-styles')) return;
-  const style = document.createElement('style');
-  style.id = 'contact-styles';
-  style.textContent = `
-    .contact-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .contact-card:last-child { border-bottom: none; }
-    .contact-avatar {
-      width: 42px; height: 42px;
-      background: linear-gradient(135deg,#E8271A,#ff6b57);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 18px; color: #fff;
-      flex-shrink: 0;
-    }
-    .contact-info { flex: 1; min-width: 0; }
-    .contact-name  { font-weight: 600; font-size: 15px; }
-    .contact-phone { font-size: 13px; opacity: .7; margin-top: 2px; }
-    .contact-email { font-size: 12px; opacity: .5; }
-    .contact-actions { display: flex; gap: 6px; }
-    .icon-btn { font-size: 16px; padding: 6px 8px !important; }
-    .icon-btn.danger:hover { color: #E8271A; }
-    .btn-xs { font-size: 12px; padding: 4px 10px; }
-  `;
-  document.head.appendChild(style);
-})();
 
 // ── Export ────────────────────────────────────────────────────────────────────
 window.renderContacts      = renderContacts;
