@@ -1,62 +1,60 @@
 // ── sos.js ────────────────────────────────────────────────────────────────────
-// SOS: hold-to-trigger with countdown, active SOS state, timer, resolve
+// SOS: hold-to-trigger countdown, active state, SMS notify, resolve
 
 let _holdTimer    = null;
-let _holdStart    = null;
 let _arcInterval  = null;
 let _sosElapsed   = 0;
 let _sosElInterval = null;
 
 // ── Hold start ────────────────────────────────────────────────────────────────
 function startSOSHold(e) {
-  if (e) e.preventDefault();
+  if (e) { e.preventDefault(); e.stopPropagation(); }
   if (state.sosActive) return;
 
   const countdownSec = parseInt(document.getElementById('countdown-sec')?.value || '3', 10);
+
+  // Immediate SOS if countdown = 0
   if (countdownSec === 0) { triggerSOS('manual'); return; }
 
-  _holdStart = Date.now();
-  vibrate(50);
+  vibrate && vibrate(40);
 
-  // Animate the SVG arc
-  const arc = document.getElementById('countdown-arc');
+  const arc         = document.getElementById('countdown-arc');
+  const label       = document.getElementById('sos-label');
+  const hint        = document.getElementById('sos-hint');
   const circumference = 578; // 2π × 92
   let elapsed = 0;
-  const step = 50; // ms
-  const steps = (countdownSec * 1000) / step;
+  const tickMs = 40;
+  const totalTicks = (countdownSec * 1000) / tickMs;
+
+  if (arc) arc.style.strokeDashoffset = String(circumference);
 
   _arcInterval = setInterval(() => {
     elapsed++;
-    const progress = elapsed / steps;
-    if (arc) arc.style.strokeDashoffset = circumference * (1 - progress);
+    const progress = elapsed / totalTicks;
+    const remaining = Math.ceil(countdownSec - (elapsed * tickMs / 1000));
 
-    const label = document.getElementById('sos-label');
-    const hint  = document.getElementById('sos-hint');
-    if (label) label.textContent = Math.ceil(countdownSec - (elapsed * step / 1000));
+    if (arc)   arc.style.strokeDashoffset = String(circumference * (1 - progress));
+    if (label) label.textContent = remaining > 0 ? String(remaining) : '🚨';
     if (hint)  hint.textContent  = 'KEEP HOLDING…';
 
-    if (elapsed >= steps) {
+    if (elapsed >= totalTicks) {
       clearInterval(_arcInterval);
+      _arcInterval = null;
       triggerSOS('manual');
     }
-  }, step);
-
-  _holdTimer = setTimeout(() => {}, countdownSec * 1000);
+  }, tickMs);
 }
 
-// ── Hold cancel ───────────────────────────────────────────────────────────────
+// ── Hold cancel (finger lifted before timer ends) ────────────────────────────
 function cancelSOSHold() {
-  if (_arcInterval) clearInterval(_arcInterval);
-  if (_holdTimer)   clearTimeout(_holdTimer);
-  _arcInterval = null;
-  _holdTimer   = null;
+  if (_arcInterval) { clearInterval(_arcInterval); _arcInterval = null; }
+  if (_holdTimer)   { clearTimeout(_holdTimer);    _holdTimer   = null; }
 
   if (!state.sosActive) {
-    // Reset arc and label
-    const arc = document.getElementById('countdown-arc');
-    if (arc) arc.style.strokeDashoffset = '578';
+    const arc   = document.getElementById('countdown-arc');
     const label = document.getElementById('sos-label');
     const hint  = document.getElementById('sos-hint');
+    if (arc)   arc.style.strokeDashoffset = '578';
     if (label) label.textContent = 'SOS';
     if (hint)  hint.textContent  = 'HOLD TO TRIGGER';
   }
@@ -65,12 +63,12 @@ function cancelSOSHold() {
 // ── Trigger SOS ───────────────────────────────────────────────────────────────
 function triggerSOS(source) {
   if (state.sosActive) return;
+  source = source || 'manual';
 
   state.sosActive    = true;
   state.sosStartTime = Date.now();
-  source = source || 'manual';
 
-  vibrate([300, 100, 300, 100, 300]);
+  vibrate && vibrate([300, 100, 300, 100, 600]);
 
   // Banner
   const banner = document.getElementById('sos-banner');
@@ -80,16 +78,17 @@ function triggerSOS(source) {
   const bar = document.getElementById('sos-active-bar');
   if (bar) bar.style.display = 'block';
 
-  // SOS button style
-  const btn = document.getElementById('sos-btn');
-  if (btn) btn.classList.add('sos-triggered');
-
+  // SOS button
+  const btn   = document.getElementById('sos-btn');
   const label = document.getElementById('sos-label');
   const hint  = document.getElementById('sos-hint');
+  const arc   = document.getElementById('countdown-arc');
+  if (btn)   btn.classList.add('sos-triggered');
   if (label) label.textContent = '🚨';
   if (hint)  hint.textContent  = 'SOS ACTIVE';
+  if (arc)   arc.style.strokeDashoffset = '0';
 
-  // Start elapsed timer
+  // SOS elapsed timer
   _sosElapsed = 0;
   _sosElInterval = setInterval(() => {
     _sosElapsed++;
@@ -97,62 +96,66 @@ function triggerSOS(source) {
     if (timerEl) timerEl.textContent = formatDuration(_sosElapsed);
   }, 1000);
 
-  // Get current position
-  const pos = state.position || {};
-  const lat  = pos.lat  || null;
-  const lng  = pos.lng  || null;
+  // Current position
+  const pos  = (window.state && state.position) || {};
+  const lat  = pos.lat   || null;
+  const lng  = pos.lng   || null;
   const addr = pos.address || 'Unknown location';
 
-  // Drop map marker
+  // Drop SOS pin on map
   if (lat && lng) placeSosMarker && placeSosMarker(lat, lng, new Date().toLocaleString());
 
-  // Save to incident history
-  const incident = saveIncident && saveIncident({
-    type:      'SOS',
-    lat, lng, address: addr,
-    riskScore: state.riskScore || 0,
-    notes:     `Triggered via ${source}`,
+  // Save incident to history
+  saveIncident && saveIncident({
+    type: 'SOS', lat, lng, address: addr,
+    riskScore: (window.state && state.riskScore) || 0,
+    notes: 'Triggered via ' + source,
   });
 
-  logEvent(`🚨 SOS TRIGGERED (${source}) — ${addr}`);
-  showToast('🚨 SOS ACTIVE — Contacts notified', 'error', 8000);
+  // Update SOS count badge
+  const countEl = document.getElementById('sos-count');
+  if (countEl) countEl.textContent = String(parseInt(countEl.textContent || '0', 10) + 1);
 
-  // SMS all emergency contacts via sms: links (browser fallback)
+  logEvent && logEvent('🚨 SOS ACTIVE · source: ' + source + ' · ' + addr);
+  showToast && showToast('🚨 SOS active — contacts notified', 'error', 8000);
+
+  // Notify contacts via SMS
   notifyContacts(lat, lng, addr);
 
-  // Navigate to tracking view to show live map
-  showView('tracking');
+  // Switch to tracking view so user sees live map
+  showView && showView('tracking');
 }
 
-// ── Notify contacts via SMS link ──────────────────────────────────────────────
+// ── SMS contacts ──────────────────────────────────────────────────────────────
 function notifyContacts(lat, lng, addr) {
   const contacts = getEmergencyContacts ? getEmergencyContacts() : [];
-  if (contacts.length === 0) {
-    logEvent('⚠️ No emergency contacts to notify');
+  if (!contacts.length) {
+    logEvent && logEvent('⚠️ No emergency contacts — add some in Contacts tab');
+    showToast && showToast('Add emergency contacts for SMS alerts', 'warning', 6000);
     return;
   }
 
-  const mapsLink = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : '';
-  const msg = encodeURIComponent(
-    `🚨 EMERGENCY ALERT from SafeGuard!\n` +
-    `${document.getElementById('user-name')?.value || 'Someone'} has triggered an SOS.\n` +
-    (addr ? `Location: ${addr}\n` : '') +
-    (mapsLink ? `Map: ${mapsLink}` : '')
+  const name     = document.getElementById('user-name')?.value || 'Someone';
+  const mapsLink = (lat && lng) ? ' Map: https://maps.google.com/?q=' + lat + ',' + lng : '';
+  const body     = encodeURIComponent(
+    '🚨 EMERGENCY from SafeGuard!\n'
+    + name + ' triggered an SOS alert.\n'
+    + (addr ? 'Location: ' + addr : '')
+    + mapsLink
   );
 
   contacts.forEach((c, i) => {
-    // Open SMS links sequentially with small delay
     setTimeout(() => {
-      const a = document.createElement('a');
-      a.href = `sms:${encodeURIComponent(c.phone)}?body=${msg}`;
+      const a    = document.createElement('a');
+      a.href     = 'sms:' + encodeURIComponent(c.phone) + '?body=' + body;
       a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
-      setTimeout(() => a.remove(), 1000);
-    }, i * 1500);
+      setTimeout(() => a.remove(), 1500);
+    }, i * 1200);
   });
 
-  logEvent(`📱 SMS alert queued for ${contacts.length} contact(s)`);
+  logEvent && logEvent('📱 SMS queued for ' + contacts.length + ' contact(s)');
 }
 
 // ── Resolve SOS ───────────────────────────────────────────────────────────────
@@ -160,41 +163,34 @@ function resolveSOS() {
   if (!state.sosActive) return;
 
   state.sosActive = false;
-  clearInterval(_sosElInterval);
+  if (_sosElInterval) { clearInterval(_sosElInterval); _sosElInterval = null; }
 
-  // Hide banner & bar
   const banner = document.getElementById('sos-banner');
   if (banner) banner.classList.remove('active');
   const bar = document.getElementById('sos-active-bar');
   if (bar) bar.style.display = 'none';
 
-  // Reset button
-  const btn = document.getElementById('sos-btn');
-  if (btn) btn.classList.remove('sos-triggered');
-  const arc = document.getElementById('countdown-arc');
-  if (arc) arc.style.strokeDashoffset = '578';
+  const btn   = document.getElementById('sos-btn');
+  const arc   = document.getElementById('countdown-arc');
   const label = document.getElementById('sos-label');
   const hint  = document.getElementById('sos-hint');
+  if (btn)   btn.classList.remove('sos-triggered');
+  if (arc)   arc.style.strokeDashoffset = '578';
   if (label) label.textContent = 'SOS';
   if (hint)  hint.textContent  = 'HOLD TO TRIGGER';
 
-  // Mark latest SOS incident resolved
+  // Mark latest active incident resolved
   const history = loadHistory ? loadHistory() : [];
   const latest  = history.find(h => h.type === 'SOS' && !h.resolved);
   if (latest) resolveIncident && resolveIncident(latest.id);
 
-  logEvent('✅ SOS resolved — marked safe');
-  showToast('✅ You are marked safe', 'success', 4000);
-  vibrate([100, 50, 100]);
+  logEvent  && logEvent('✅ SOS resolved — marked safe');
+  showToast && showToast('✅ You are safe — SOS cancelled', 'success', 4000);
+  vibrate   && vibrate([80, 50, 80]);
 }
 
-// ── Voice SOS (placeholder — wired in audio.js) ───────────────────────────────
-function triggerVoiceSOS() {
-  triggerSOS('voice');
-}
-
+// ── Exports ───────────────────────────────────────────────────────────────────
 window.startSOSHold  = startSOSHold;
 window.cancelSOSHold = cancelSOSHold;
 window.triggerSOS    = triggerSOS;
 window.resolveSOS    = resolveSOS;
-window.triggerVoiceSOS = triggerVoiceSOS;
