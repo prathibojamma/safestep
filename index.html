@@ -26,9 +26,9 @@
 
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <meta name="description" content="SafeStep — AI-Powered Emergency Response System"/>
+  <meta name="description" content="SafeGuard — AI-Powered Emergency Response System"/>
   <meta name="theme-color" content="#E8271A"/>
-  <meta property="og:title" content="SafeStep — AI Emergency Response"/>
+  <meta property="og:title" content="SafeGuard — AI Emergency Response"/>
   <meta property="og:description" content="Real-time SOS, AI threat detection, live GPS tracking"/>
   <meta property="og:type" content="website"/>
   <title>SafeGuard — AI Emergency Response</title>
@@ -73,7 +73,7 @@
 
       <!-- Topbar -->
       <div id="topbar">
-        <div class="logo">SAFE<span>STEP</span></div>
+        <div class="logo">SAFE<span>GUARD</span></div>
         <div class="status-pill">
           <div class="status-dot"></div>
           <span id="status-text">System online</span>
@@ -116,8 +116,8 @@
             </div>
 
             <div class="sos-quick-actions" id="sos-actions">
-              <button class="btn btn-ghost btn-sm" onclick="triggerSOS('voice')">🎙️ Voice SOS</button>
-              <button class="btn btn-ghost btn-sm" onclick="startAudioMonitor();showView('ai')">🔊 Monitor</button>
+              <button class="btn btn-ghost btn-sm" onclick="triggerVoiceSOS()">🎙️ Voice SOS</button>
+              <button class="btn btn-ghost btn-sm" onclick="showView('ai');startAudioMonitor()">🔊 Monitor</button>
               <button class="btn btn-ghost btn-sm" onclick="showView('tracking')">📍 Track</button>
             </div>
           </div>
@@ -244,7 +244,7 @@
                 </button>
               </div>
               <div class="ai-transcript-label">Live transcript:</div>
-              <div id="ai-output" class="ai-output">Press "Start Monitoring" to begin audio threat detection…</div>
+              <div id="ai-output" class="ai-output" data-placeholder="true">Press "Start Monitoring" to begin audio threat detection…</div>
               <div id="keyword-chips" class="keyword-chips"></div>
             </div>
 
